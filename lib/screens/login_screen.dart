@@ -28,34 +28,88 @@ class _LoginScreenState extends State<LoginScreen> {
     print('Email: ${_emailController.text.trim()}');
     print('Password: ${_passwordController.text}');
     
-    if (_formKey.currentState!.validate()) {
-      print('Form validated successfully');
-      setState(() => _isLoading = true);
+    // Explicit validation
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    
+    // Email validation
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    // Stricter email validation
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address (e.g., user@example.com)'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    
+    // Password validation
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your password'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    if (password.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 8 characters'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must contain at least one uppercase letter'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must contain at least one lowercase letter'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must contain at least one number'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must contain at least one special character'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    
+    // If all validations pass, proceed with login
+    setState(() => _isLoading = true);
 
-      try {
-        print('Calling AuthService.login...');
-        await context.read<AuthService>().login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
+    try {
+      print('Calling AuthService.login...');
+      await context.read<AuthService>().login(
+        email: email,
+        password: password,
+      );
+      print('Login successful');
+    } catch (e) {
+      print('Login error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: const Color(0xFFDC2626),
+          ),
         );
-        print('Login successful');
-      } catch (e) {
-        print('Login error: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: const Color(0xFFDC2626),
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
       }
-    } else {
-      print('Form validation failed');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -210,17 +264,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            // Enhanced email validation
-                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                            if (!emailRegex.hasMatch(value)) {
-                              return 'Please enter a valid email address (e.g., user@example.com)';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -264,31 +307,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 8) {
-                              return 'Password must be at least 8 characters';
-                            }
-                            // Check for at least one uppercase letter
-                            if (!value.contains(RegExp(r'[A-Z]'))) {
-                              return 'Password must contain at least one uppercase letter';
-                            }
-                            // Check for at least one lowercase letter
-                            if (!value.contains(RegExp(r'[a-z]'))) {
-                              return 'Password must contain at least one lowercase letter';
-                            }
-                            // Check for at least one number
-                            if (!value.contains(RegExp(r'[0-9]'))) {
-                              return 'Password must contain at least one number';
-                            }
-                            // Check for at least one special character
-                            if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-                              return 'Password must contain at least one special character';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
