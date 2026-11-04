@@ -34,19 +34,38 @@ class _LoginScreenState extends State<LoginScreen> {
     
     // Email validation
     if (email.isEmpty) {
+      print('Email is empty');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your email'), backgroundColor: Color(0xFFDC2626)),
       );
       return;
     }
-    // Stricter email validation
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(email)) {
+    // Stricter email validation - only accept common TLDs
+    final validTLDs = ['com', 'org', 'net', 'edu', 'gov', 'mil', 'co', 'za', 'uk', 'us', 'ca', 'au', 'de', 'fr', 'in', 'jp', 'cn', 'br', 'ru', 'es', 'it', 'nl', 'se', 'no', 'dk', 'fi', 'ch', 'at', 'be', 'pl', 'cz', 'hu', 'gr', 'pt', 'ie', 'tr', 'il', 'sa', 'ae', 'eg', 'ng', 'ke', 'za'];
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.([a-zA-Z]{2,})$');
+    final match = emailRegex.firstMatch(email);
+    print('Testing email: $email');
+    print('Regex match: ${match != null}');
+    
+    if (match == null) {
+      print('Email validation failed - no match');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid email address (e.g., user@example.com)'), backgroundColor: Color(0xFFDC2626)),
       );
       return;
     }
+    
+    final tld = match.group(1)?.toLowerCase();
+    print('TLD detected: $tld');
+    
+    if (!validTLDs.contains(tld)) {
+      print('Email validation failed - invalid TLD: $tld');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address with a recognized domain (e.g., .com, .org, .co.za)'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
+    print('Email validation passed');
     
     // Password validation
     if (password.isEmpty) {
@@ -332,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Login',
+                                  'LOGIN NOW',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
