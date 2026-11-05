@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../services/firestore_service.dart';
 import '../../services/storage_service.dart';
+import '../../services/auth_service.dart';
+import '../../models/prescription.dart';
 
 class SubmitPrescriptionScreen extends StatefulWidget {
   const SubmitPrescriptionScreen({super.key});
@@ -12,25 +15,25 @@ class SubmitPrescriptionScreen extends StatefulWidget {
 
 class _SubmitPrescriptionScreenState extends State<SubmitPrescriptionScreen> {
   final StorageService _storageService = StorageService();
-  String? _selectedImagePath;
+  XFile? _selectedImage;
   bool _isUploading = false;
 
   Future<void> _pickImage() async {
     final image = await _storageService.pickImage();
     if (image != null) {
-      setState(() => _selectedImagePath = image.path);
+      setState(() => _selectedImage = image);
     }
   }
 
   Future<void> _captureImage() async {
     final image = await _storageService.captureImage();
     if (image != null) {
-      setState(() => _selectedImagePath = image.path);
+      setState(() => _selectedImage = image);
     }
   }
 
   Future<void> _submitPrescription() async {
-    if (_selectedImagePath == null) {
+    if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select or capture a prescription image')),
       );
@@ -39,14 +42,37 @@ class _SubmitPrescriptionScreenState extends State<SubmitPrescriptionScreen> {
 
     setState(() => _isUploading = true);
     try {
-      // TODO: Implement actual upload and submission
-      // This would:
-      // 1. Upload image to Firebase Storage
-      // 2. Create prescription record in Firestore
-      // 3. Navigate back to prescriptions list
+      final authService = context.read<AuthService>();
+      final firestoreService = context.read<FirestoreService>();
       
-      await Future.delayed(const Duration(seconds: 2)); // Simulate upload
-      
+      if (authService.currentUser == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Upload image to Firebase Storage
+      final imageUrl = await _storageService.uploadPrescription(
+        authService.currentUser!.userId,
+        _selectedImage,
+      );
+
+      if (imageUrl == null) {
+        throw Exception('Failed to upload image');
+      }
+
+      // Create prescription record in Firestore
+      final prescription = Prescription(
+        prescriptionId: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: authService.currentUser!.userId,
+        imageUrl: imageUrl,
+        medicationName: 'Prescription',
+        dosage: 'As prescribed',
+        instructions: 'Follow doctor instructions',
+        status: 'pending',
+        submittedAt: DateTime.now(),
+      );
+
+      await firestoreService.addPrescription(prescription);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Prescription submitted successfully')),
@@ -103,7 +129,7 @@ class _SubmitPrescriptionScreenState extends State<SubmitPrescriptionScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            if (_selectedImagePath != null)
+            if (_selectedImage != null)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -114,7 +140,7 @@ class _SubmitPrescriptionScreenState extends State<SubmitPrescriptionScreen> {
                       const Text('Image selected'),
                       const SizedBox(height: 8),
                       Text(
-                        _selectedImagePath!.split('/').last,
+                        _selectedImage!.name,
                         style: const TextStyle(color: Colors.grey),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
