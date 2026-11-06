@@ -38,4 +38,10 @@ class RefillReminder {
       'active': active,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory RefillReminder.fromJson(Map<String, dynamic> json) => RefillReminder.fromMap(json);
 }

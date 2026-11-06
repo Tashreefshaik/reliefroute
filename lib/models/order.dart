@@ -38,4 +38,10 @@ class Order {
       'total_amount': totalAmount,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory Order.fromJson(Map<String, dynamic> json) => Order.fromMap(json);
 }

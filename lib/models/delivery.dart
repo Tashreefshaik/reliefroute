@@ -38,4 +38,10 @@ class Delivery {
       'tracking_time': trackingTime?.toIso8601String(),
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory Delivery.fromJson(Map<String, dynamic> json) => Delivery.fromMap(json);
 }

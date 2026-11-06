@@ -44,4 +44,10 @@ class User {
       'image_url': imageUrl,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory User.fromJson(Map<String, dynamic> json) => User.fromMap(json);
 }

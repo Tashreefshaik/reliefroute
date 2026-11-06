@@ -32,4 +32,10 @@ class OrderItem {
       'unit_price': unitPrice,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem.fromMap(json);
 }

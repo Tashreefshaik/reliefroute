@@ -44,4 +44,10 @@ class Medication {
       'image_url': imageUrl,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory Medication.fromJson(Map<String, dynamic> json) => Medication.fromMap(json);
 }

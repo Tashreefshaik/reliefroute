@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../models/user.dart';
 
 class AuthService extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
   User? _currentUser;
   User? _userDetails;
 
@@ -12,8 +12,19 @@ class AuthService extends ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
 
   AuthService() {
-    _auth.authStateChanges().listen((User? user) {
-      _currentUser = user;
+    _auth.authStateChanges().listen((firebase_auth.User? user) {
+      if (user != null) {
+        _currentUser = User(
+          userId: user.uid,
+          fullName: user.displayName ?? 'User',
+          email: user.email ?? '',
+          phone: user.phoneNumber ?? '',
+          role: 'patient',
+          address: '',
+        );
+      } else {
+        _currentUser = null;
+      }
       notifyListeners();
     });
   }

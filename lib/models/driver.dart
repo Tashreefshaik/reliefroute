@@ -32,4 +32,10 @@ class Driver {
       'availability': availability,
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver.fromMap(json);
 }

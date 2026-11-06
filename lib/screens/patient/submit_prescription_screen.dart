@@ -64,7 +64,7 @@ class _SubmitPrescriptionScreenState extends State<SubmitPrescriptionScreen> {
         prescriptionId: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: authService.currentUser!.userId,
         imageUrl: imageUrl,
-        medicationName: 'Prescription',
+        medicationName: 'Uploaded Prescription',
         dosage: 'As prescribed',
         instructions: 'Follow doctor instructions',
         status: 'pending',

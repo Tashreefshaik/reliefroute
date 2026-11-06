@@ -5,6 +5,10 @@ class Prescription {
   final String status;
   final String? verifiedBy;
   final DateTime? verifiedAt;
+  final String? medicationName;
+  final String? dosage;
+  final String? instructions;
+  final DateTime? submittedAt;
 
   Prescription({
     required this.prescriptionId,
@@ -13,6 +17,10 @@ class Prescription {
     required this.status,
     this.verifiedBy,
     this.verifiedAt,
+    this.medicationName,
+    this.dosage,
+    this.instructions,
+    this.submittedAt,
   });
 
   factory Prescription.fromMap(Map<String, dynamic> map) {
@@ -22,9 +30,15 @@ class Prescription {
       imageUrl: map['image_url'] ?? map['imageUrl'],
       status: map['status'] ?? 'pending',
       verifiedBy: map['verified_by'] ?? map['verifiedBy'],
-      verifiedAt: map['verified_at'] != null 
-          ? DateTime.parse(map['verified_at']) 
+      verifiedAt: map['verified_at'] != null
+          ? DateTime.parse(map['verified_at'])
           : (map['verifiedAt'] as DateTime?),
+      medicationName: map['medication_name'] ?? map['medicationName'],
+      dosage: map['dosage'],
+      instructions: map['instructions'],
+      submittedAt: map['submitted_at'] != null
+          ? DateTime.parse(map['submitted_at'])
+          : (map['submittedAt'] as DateTime?),
     );
   }
 
@@ -36,6 +50,16 @@ class Prescription {
       'status': status,
       'verified_by': verifiedBy,
       'verified_at': verifiedAt?.toIso8601String(),
+      'medication_name': medicationName,
+      'dosage': dosage,
+      'instructions': instructions,
+      'submitted_at': submittedAt?.toIso8601String(),
     };
   }
+
+  // Alias for Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Alias for Firestore compatibility
+  factory Prescription.fromJson(Map<String, dynamic> json) => Prescription.fromMap(json);
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1053835978123",
+    "project_id": "reliefroute-25804",
+    "storage_bucket": "reliefroute-25804.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053835978123:android:1a198679b79ecf9dd93b8e",
+        "android_client_info": {
+          "package_name": "com.reliefroute.reliefroute_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnKYtg0zVTQhnGsrAqnEt032hmjRoQDsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
