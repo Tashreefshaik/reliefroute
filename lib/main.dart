@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
@@ -12,7 +13,9 @@ import 'services/gps_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     print('Firebase initialization failed: $e');
     print('App will run with mock services for now.');
