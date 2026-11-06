@@ -3,30 +3,38 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../models/user.dart';
 
 class AuthService extends ChangeNotifier {
-  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
+  firebase_auth.FirebaseAuth? _auth;
   User? _currentUser;
   User? _userDetails;
+  bool _useMock = false;
 
   User? get currentUser => _currentUser;
   User? get userDetails => _userDetails;
   bool get isAuthenticated => _currentUser != null;
 
   AuthService() {
-    _auth.authStateChanges().listen((firebase_auth.User? user) {
-      if (user != null) {
-        _currentUser = User(
-          userId: user.uid,
-          fullName: user.displayName ?? 'User',
-          email: user.email ?? '',
-          phone: user.phoneNumber ?? '',
-          role: 'patient',
-          address: '',
-        );
-      } else {
-        _currentUser = null;
-      }
-      notifyListeners();
-    });
+    try {
+      _auth = firebase_auth.FirebaseAuth.instance;
+      _auth!.authStateChanges().listen((firebase_auth.User? user) {
+        if (user != null) {
+          _currentUser = User(
+            userId: user.uid,
+            fullName: user.displayName ?? 'User',
+            email: user.email ?? '',
+            phone: user.phoneNumber ?? '',
+            role: 'patient',
+            address: '',
+          );
+        } else {
+          _currentUser = null;
+        }
+        notifyListeners();
+      });
+    } catch (e) {
+      print('Firebase Auth not available, using mock authentication: $e');
+      _useMock = true;
+      _auth = null;
+    }
   }
 
   Future<void> register({
@@ -37,12 +45,27 @@ class AuthService extends ChangeNotifier {
     required String role,
     required String address,
   }) async {
+    if (_useMock || _auth == null) {
+      // Mock registration
+      _currentUser = User(
+        userId: DateTime.now().millisecondsSinceEpoch.toString(),
+        fullName: fullName,
+        email: email,
+        phone: phone,
+        role: role,
+        address: address,
+      );
+      _userDetails = _currentUser;
+      notifyListeners();
+      return;
+    }
+
     try {
-      final userCredential = await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth!.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
+
       _currentUser = User(
         userId: userCredential.user?.uid ?? '',
         fullName: fullName,
@@ -62,12 +85,32 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String password,
   }) async {
+    if (_useMock || _auth == null) {
+      // Mock login - check for known test users
+      String role = 'patient';
+      if (email.contains('pharmacist')) role = 'pharmacist';
+      else if (email.contains('driver')) role = 'driver';
+      else if (email.contains('admin')) role = 'admin';
+
+      _currentUser = User(
+        userId: DateTime.now().millisecondsSinceEpoch.toString(),
+        fullName: 'Test User',
+        email: email,
+        phone: '',
+        role: role,
+        address: '',
+      );
+      _userDetails = _currentUser;
+      notifyListeners();
+      return;
+    }
+
     try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth!.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
+
       _currentUser = User(
         userId: userCredential.user?.uid ?? '',
         fullName: userCredential.user?.displayName ?? 'User',
@@ -84,7 +127,9 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _auth.signOut();
+    if (_auth != null) {
+      await _auth!.signOut();
+    }
     _currentUser = null;
     _userDetails = null;
     notifyListeners();

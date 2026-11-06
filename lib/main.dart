@@ -11,7 +11,12 @@ import 'services/gps_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print('Firebase initialization failed: $e');
+    print('App will run with mock services for now.');
+  }
   runApp(const ReliefRouteApp());
 }
 
