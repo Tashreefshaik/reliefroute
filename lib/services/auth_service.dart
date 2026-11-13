@@ -6,13 +6,18 @@ class AuthService extends ChangeNotifier {
   firebase_auth.FirebaseAuth? _auth;
   User? _currentUser;
   User? _userDetails;
-  bool _useMock = false;
+  bool _useMock = true; // Force mock mode for presentation
 
   User? get currentUser => _currentUser;
   User? get userDetails => _userDetails;
   bool get isAuthenticated => _currentUser != null;
 
   AuthService() {
+    // Force mock mode for presentation/demo purposes
+    _useMock = true;
+    _auth = null;
+    print('Using mock authentication mode for presentation');
+
     try {
       _auth = firebase_auth.FirebaseAuth.instance;
       _auth!.authStateChanges().listen((firebase_auth.User? user) {
